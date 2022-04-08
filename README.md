@@ -72,7 +72,6 @@ This project encapsulates a release build of [o3de-multiplayersample](https://gi
 # TODOs
  
  - service discovery between client & server services
-    -   ingress rules between client & server security groups
     -   pass private IP address of server to client via env var
  - create ECR repo in stack and build MPS image from docker asset
  - stack output for: server task IP address, AWS web console deep-link logs tabs
