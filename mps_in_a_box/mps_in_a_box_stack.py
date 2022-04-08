@@ -12,7 +12,7 @@ class MpsInABoxStack(Stack):
         super().__init__(scope, construct_id, **kwargs)
 
         # stack variables
-        server_port = 33450                 # the port the server will be listening on. 
+        server_port = 33450                 # the port the server will be listening on. Should match the `sv_port` specified in server.cfg
         mps_repo_name = "o3de-mps-windows"  # the ECR repo in the local region which contains the MPS image
         client_count = 1                    # how many copies of the client we want to run
 
@@ -36,6 +36,7 @@ class MpsInABoxStack(Stack):
             )
         )
         serverService = ecs.FargateService(self, "MpsServerService", cluster=cluster, task_definition=mps_server_task_def)
+        
 
 
         # ECS task def + service for MPS CLIENT
@@ -53,7 +54,11 @@ class MpsInABoxStack(Stack):
             cluster=cluster, 
             task_definition=mps_client_task_def, 
             desired_count=client_count
-        )
+        ) 
+
+        # allow connections between the server and client services
+        serverService.connections.allow_from(clientService, ec2.Port.udp(server_port))
+        clientService.connections.allow_from(serverService, ec2.Port.udp(server_port))
 
     def get_mps_taskdef(self, id: str ) -> ecs.FargateTaskDefinition:
         return ecs.FargateTaskDefinition(self, id,
